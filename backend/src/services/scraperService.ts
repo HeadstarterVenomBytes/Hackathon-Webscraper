@@ -1,17 +1,8 @@
 import puppeteer, { Browser, Page, HTTPResponse } from "puppeteer";
-import { LinkData, ScrapedData, ImageData } from "./types";
-import { Database } from "./database";
+import { LinkData, ScrapedData, ImageData } from "../models/ScrapedData";
 
-export class WebScraper {
+export class ScraperService {
   private browser: Browser | null = null;
-  private database: Database;
-  private urlsToScrape: Set<string> = new Set();
-  private scrapedUrls: Set<string> = new Set();
-
-  constructor(database: Database, initialUrls: string[]) {
-    this.database = database;
-    initialUrls.forEach((url) => this.urlsToScrape.add(url));
-  }
 
   async init(): Promise<void> {
     this.browser = await puppeteer.launch();
@@ -21,31 +12,10 @@ export class WebScraper {
     if (this.browser) await this.browser.close();
   }
 
-  async scrapeAll(maxUrls: number = 100): Promise<void> {
-    if (!this.browser) {
-      throw new Error("WebScraper not initialized");
-    }
-
-    while (this.urlsToScrape.size > 0 && this.scrapedUrls.size < maxUrls) {
-      const url = this.urlsToScrape.values().next().value;
-
-      // Ensure that url is defined
-      if (typeof url === "string") {
-        this.urlsToScrape.delete(url);
-
-        // Proceed only if the URL has not been scraped
-        if (!this.scrapedUrls.has(url)) {
-          await this.scrapePage(url);
-          this.scrapedUrls.add(url);
-        }
-      }
-    }
-  }
-
   private async extractData(
     page: Page,
     url: string,
-    response: HTTPResponse,
+    response: HTTPResponse
   ): Promise<ScrapedData> {
     const [
       title,
@@ -92,7 +62,7 @@ export class WebScraper {
   private async extractDescription(page: Page): Promise<string> {
     return page.evaluate(() => {
       const metaDescription = document.querySelector(
-        'meta[name="description"]',
+        'meta[name="description"]'
       );
       return metaDescription
         ? (metaDescription as HTMLMetaElement).content
@@ -151,21 +121,21 @@ export class WebScraper {
   }
 
   private async getLastModified(
-    response: HTTPResponse,
+    response: HTTPResponse
   ): Promise<string | null> {
     const headers = response.headers();
     return headers["last-modified"] || null;
   }
 
   private async getContentLength(
-    response: HTTPResponse,
+    response: HTTPResponse
   ): Promise<number | null> {
     const headers = response.headers();
     const contentLength = headers["content-length"];
     return contentLength ? parseInt(contentLength, 10) : null;
   }
 
-  private async scrapePage(url: string): Promise<void> {
+  async scrapePage(url: string): Promise<ScrapedData> {
     if (!this.browser) {
       throw new Error("WebScraper not initialized");
     }
@@ -184,7 +154,7 @@ export class WebScraper {
 
       if (response.status() === 404) {
         console.log(`Page not found: ${url}`);
-        return;
+        throw new Error(`404 - Page not found`);
       }
 
       if (!response.ok()) {
@@ -194,23 +164,11 @@ export class WebScraper {
       await page.waitForSelector("body");
 
       const scrapedData = await this.extractData(page, url, response);
-      await this.database.storeData(scrapedData);
 
-      // Add new links to urlsToScrape
-      scrapedData.links.forEach((link) => {
-        if (
-          !this.scrapedUrls.has(link.href) &&
-          !this.urlsToScrape.has(link.href)
-        ) {
-          this.urlsToScrape.add(link.href);
-        }
-      });
-
-      console.log(
-        `Data from ${url} has been scraped and stored in the database.`,
-      );
+      return scrapedData;
     } catch (error) {
       console.error(`Error scraping ${url}:`, error);
+      throw error; // Rethrow to let the handler decide what to do
     } finally {
       if (page) await page.close();
     }

@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "target": "ES2020" /* Keep ES2020 as it is modern and compatible. */,
+    "lib": ["ES2020", "DOM"] /* Include libraries for ES2020 and the DOM. */,
+    "jsx": "react-jsx" /* Use the modern React JSX transform. */,
+    "experimentalDecorators": true /* Enable support for decorators. */,
+    "emitDecoratorMetadata": true /* Emit metadata for decorated declarations. */,
+    "useDefineForClassFields": true /* Emit ECMAScript-standard-compliant class fields. */,
+
+    /* Modules */
+    "module": "commonjs" /* CommonJS is fine for Node.js. */,
+    "rootDir": "./src" /* Set the root directory. */,
+    "moduleResolution": "node" /* Use Node.js-style module resolution. */,
+    "resolveJsonModule": true /* Enable importing .json files. */,
+
+    /* JavaScript Support */
+    "allowJs": true /* Allow JavaScript files in the project. */,
+    "checkJs": true /* Enable type-checking for JavaScript files. */,
+
+    /* Emit */
+    "declaration": true /* Generate declaration (.d.ts) files. */,
+    "sourceMap": true /* Generate source maps for debugging. */,
+    "removeComments": true /* Remove comments in emitted files. */,
+    "outDir": "./dist" /* Specify the output directory. */,
+
+    /* Interop Constraints */
+    "isolatedModules": true /* Ensure each file can be transpiled independently. */,
+    "esModuleInterop": true /* Enable interoperability between CommonJS and ES modules. */,
+    "forceConsistentCasingInFileNames": true /* Ensure consistent casing in file names. */,
+
+    /* Type Checking */
+    "strict": true /* Enable all strict type-checking options. */,
+    "noImplicitAny": true /* Raise an error on implicit `any` types. */,
+    "strictNullChecks": true /* Enable strict null checking. */,
+    "strictFunctionTypes": true /* Ensure strict function type checking. */,
+    "strictBindCallApply": true /* Check argument types for bind, call, and apply. */,
+    "strictPropertyInitialization": true /* Ensure properties are initialized in constructors. */,
+    "noImplicitThis": true /* Raise an error on implicit `this` types. */,
+    "useUnknownInCatchVariables": true /* Default catch variables to `unknown`. */,
+    "alwaysStrict": true /* Emit `use strict` directives. */,
+    "noUnusedLocals": true /* Report unused local variables. */,
+    "noUnusedParameters": true /* Report unused function parameters. */,
+    "exactOptionalPropertyTypes": true /* Enforce exact optional property types. */,
+    "noImplicitReturns": true /* Report functions that don't return a value. */,
+    "noFallthroughCasesInSwitch": true /* Report fallthrough cases in switch statements. */,
+    "noUncheckedIndexedAccess": true /* Add `undefined` when indexing objects. */,
+    "noImplicitOverride": true /* Ensure methods marked `override` are properly overridden. */,
+    "noPropertyAccessFromIndexSignature": true /* Restrict property access from index signatures. */,
+
+    /* Completeness */
+    "skipLibCheck": true /* Skip type checking for all declaration files (.d.ts). */
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
