@@ -2,8 +2,7 @@ import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
-import prettier from "eslint-plugin-prettier";
-import configPrettier from "eslint-config-prettier";
+
 
 export default [
   {
@@ -19,15 +18,11 @@ export default [
     },
     plugins: {
       "@typescript-eslint": tseslint, // Add TypeScript plugin
-      prettier, // Add Prettier plugin
     },
     rules: {
       // ESLint recommended and TypeScript rules
       ...pluginJs.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
-
-      // Enable Prettier and show formatting issues as ESLint errors
-      "prettier/prettier": "error",
 
       // Custom rules
       "no-console": "off", // Allow console statements in Node.js
@@ -40,5 +35,4 @@ export default [
       "node/no-missing-import": "off", // Disable missing import warnings in TS
     },
   },
-  configPrettier, // Disable ESLint rules that conflict with Prettier
 ];
