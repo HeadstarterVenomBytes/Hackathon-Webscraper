@@ -3,12 +3,6 @@ import { LinkData, ScrapedData, ImageData } from "../models/ScrapedData";
 
 export class ScraperService {
   private browser: Browser | null = null;
-  private urlsToScrape: Set<string> = new Set();
-  private scrapedUrls: Set<string> = new Set();
-
-  constructor(initialUrls: string[]) {
-    initialUrls.forEach((url) => this.urlsToScrape.add(url));
-  }
 
   async init(): Promise<void> {
     this.browser = await puppeteer.launch();
@@ -170,17 +164,6 @@ export class ScraperService {
       await page.waitForSelector("body");
 
       const scrapedData = await this.extractData(page, url, response);
-
-      // Add new links to urlsToScrape
-      scrapedData.links.forEach((link) => {
-        if (
-          link.isInternal &&
-          !this.scrapedUrls.has(link.href) &&
-          !this.urlsToScrape.has(link.href)
-        ) {
-          this.urlsToScrape.add(link.href);
-        }
-      });
 
       return scrapedData;
     } catch (error) {
