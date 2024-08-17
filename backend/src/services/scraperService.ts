@@ -1,6 +1,5 @@
 import puppeteer, { Browser, Page, HTTPResponse } from "puppeteer";
 import { LinkData, ScrapedData, ImageData } from "../models/ScrapedData";
-import { UrlHelper } from "../utils/UrlHelper";
 
 export class ScraperService {
   private browser: Browser | null = null;
@@ -99,19 +98,14 @@ export class ScraperService {
   }
 
   private async extractLinks(page: Page, baseUrl: string): Promise<LinkData[]> {
-    // Set base URL for the first time if it's not set
-    if (!UrlHelper.getBaseUrl()) {
-      UrlHelper.setBaseUrl(baseUrl);
-    }
-
-    return page.evaluate(() => {
+    return page.evaluate((baseUrl) => {
       const links = document.querySelectorAll("a");
       return Array.from(links).map((link) => ({
         href: link.href,
         text: link.textContent?.trim() || "",
-        isInternal: UrlHelper.isInternal(link.href),
+        isInternal: link.href.startsWith(baseUrl),
       }));
-    });
+    }, baseUrl);
   }
 
   private async extractImages(page: Page): Promise<ImageData[]> {

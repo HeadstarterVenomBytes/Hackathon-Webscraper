@@ -1,24 +1,43 @@
-export class UrlHelper {
-  private static baseOrigin: string | null = null;
+import { Page } from "puppeteer";
+import { LinkData } from "../models/ScrapedData";
 
-  static normalize(url: string): URL {
-    return new URL(url);
+export class LinkExtractor {
+  private normalizedBaseUrl: string | null = null;
+
+  constructor(private baseUrl: string) {
+    this.updateNormalizedBaseUrl(baseUrl);
   }
 
-  static getBaseUrl(): string | null {
-    return this.baseOrigin;
+  private updateNormalizedBaseUrl(baseUrl: string) {
+    this.normalizedBaseUrl = this.normalizeUrl(baseUrl);
   }
 
-  static setBaseUrl(baseUrl: string): void {
-    const normalizedBaseUrl = this.normalize(baseUrl);
-    this.baseOrigin = normalizedBaseUrl.origin;
-  }
-
-  static isInternal(url: string): boolean {
-    if (this.baseOrigin === null) {
-      throw new Error("Base URL origin is not set.");
+  private normalizeUrl(url: string): string {
+    try {
+      const parsedUrl = new URL(url);
+      return parsedUrl.hostname.replace(/^www\./, "");
+    } catch {
+      return "";
     }
-    const normalizedUrl = this.normalize(url);
-    return normalizedUrl.origin === this.baseOrigin;
+  }
+
+  private isInternalUrl(url: string): boolean {
+    if (!this.normalizedBaseUrl) return false;
+    const linkUrl = this.normalizeUrl(url);
+    return (
+      linkUrl === this.normalizedBaseUrl ||
+      linkUrl.endsWith(`.${this.normalizedBaseUrl}`)
+    );
+  }
+
+  public async extractLinks(page: Page): Promise<LinkData[]> {
+    return page.evaluate((isInternalUrl) => {
+      const links = document.querySelectorAll("a");
+      return Array.from(links).map((link) => ({
+        href: link.href,
+        text: link.textContent?.trim() || "",
+        isInternal: this.isInternalUrl(link.href),
+      }));
+    }, this.isInternalUrl.bind(this));
   }
 }
