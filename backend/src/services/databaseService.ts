@@ -1,24 +1,31 @@
 import { MongoClient, ServerApiVersion, Collection } from "mongodb";
-import { ScrapedData } from "./types";
+import { ScrapedData } from "../models/ScrapedData";
 
-export class Database {
+export class DatabaseService {
   private client: MongoClient | null = null;
   private collection: Collection<ScrapedData> | null = null;
+  private dbName: string = process.env.MONGODB_DBNAME || "webscraper";
 
-  constructor(
-    private username: string,
-    private password: string,
-    private cluster: string,
-    private dbName: string = "webscraper",
-  ) {}
+  private constructMongoUri(): string {
+    const username = process.env.MONGODB_USERNAME;
+    const password = process.env.MONGODB_PASSWORD;
+    const cluster = process.env.MONGODB_CLUSTER;
 
-  private constructUri(): string {
-    return `mongodb+srv://${this.username}:${this.password}@${this.cluster}/?retryWrites=true&w=majority&appName=Cluster0`;
+    if (!username || !password || !cluster) {
+      throw new Error(
+        "Missing one or more of the required MongoDB environment variables: MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_CLUSTER"
+      );
+    }
+
+    return `mongodb+srv://${username}:${password}@${cluster}/?retryWrites=true&w=majority&appName=Cluster0`;
   }
 
   async connect(): Promise<void> {
+    if (this.client) return; // Already connected
+
     try {
-      const uri = this.constructUri();
+      const uri = this.constructMongoUri();
+
       this.client = new MongoClient(uri, {
         serverApi: {
           version: ServerApiVersion.v1,
@@ -46,10 +53,13 @@ export class Database {
     }
   }
 
+  getCollection(): Collection<ScrapedData> {
+    if (!this.collection) throw new Error("Database not initialized");
+    return this.collection;
+  }
+
   async storeData(data: ScrapedData): Promise<void> {
-    if (!this.collection) {
-      throw new Error("Database not initialized");
-    }
+    if (!this.collection) throw new Error("Database not initialized");
     await this.collection.insertOne(data);
   }
 }
