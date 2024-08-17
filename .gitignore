@@ -45,7 +45,6 @@ internal/
 **/.DS_Store
 .settings
 **/.vs
-**/.vscode/*
 !**/.vscode/tasks.json
 !**/.vscode/settings.template.json
 !**/.vscode/launch.template.json
@@ -64,3 +63,4 @@ package-lock.json
 .eslintcache
 *v8.log
 /lib/
+.env
