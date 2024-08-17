@@ -75,3 +75,5 @@ async function main() {
     await database.close();
   }
 }
+
+main();
