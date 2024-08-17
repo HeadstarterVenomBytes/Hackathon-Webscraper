@@ -9,7 +9,7 @@ export class Database {
     private username: string,
     private password: string,
     private cluster: string,
-    private dbName: string = "webscraper"
+    private dbName: string = "webscraper",
   ) {}
 
   private constructUri(): string {

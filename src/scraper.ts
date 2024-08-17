@@ -45,7 +45,7 @@ export class WebScraper {
   private async extractData(
     page: Page,
     url: string,
-    response: HTTPResponse
+    response: HTTPResponse,
   ): Promise<ScrapedData> {
     const [
       title,
@@ -92,7 +92,7 @@ export class WebScraper {
   private async extractDescription(page: Page): Promise<string> {
     return page.evaluate(() => {
       const metaDescription = document.querySelector(
-        'meta[name="description"]'
+        'meta[name="description"]',
       );
       return metaDescription
         ? (metaDescription as HTMLMetaElement).content
@@ -151,14 +151,14 @@ export class WebScraper {
   }
 
   private async getLastModified(
-    response: HTTPResponse
+    response: HTTPResponse,
   ): Promise<string | null> {
     const headers = response.headers();
     return headers["last-modified"] || null;
   }
 
   private async getContentLength(
-    response: HTTPResponse
+    response: HTTPResponse,
   ): Promise<number | null> {
     const headers = response.headers();
     const contentLength = headers["content-length"];
@@ -207,7 +207,7 @@ export class WebScraper {
       });
 
       console.log(
-        `Data from ${url} has been scraped and stored in the database.`
+        `Data from ${url} has been scraped and stored in the database.`,
       );
     } catch (error) {
       console.error(`Error scraping ${url}:`, error);
