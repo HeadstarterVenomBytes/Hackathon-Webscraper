@@ -36,7 +36,11 @@ export const scrapeHandler = async (req: Request, res: Response) => {
             }
           }
         } catch (error) {
-          errors.push({ url, error: error.message });
+          if (error instanceof Error) {
+            errors.push({ url, error: error.message });
+          } else {
+            errors.push({ url, error: String(error) });
+          }
         }
       }
     }

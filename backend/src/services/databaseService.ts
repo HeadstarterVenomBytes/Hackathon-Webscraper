@@ -4,12 +4,12 @@ import { ScrapedData } from "../models/ScrapedData";
 export class DatabaseService {
   private client: MongoClient | null = null;
   private collection: Collection<ScrapedData> | null = null;
-  private dbName: string = process.env.MONGODB_DBNAME || "webscraper";
+  private dbName: string = process.env["MONGODB_DBNAME"] || "webscraper";
 
   private constructMongoUri(): string {
-    const username = process.env.MONGODB_USERNAME;
-    const password = process.env.MONGODB_PASSWORD;
-    const cluster = process.env.MONGODB_CLUSTER;
+    const username = process.env["MONGODB_USERNAME"];
+    const password = process.env["MONGODB_PASSWORD"];
+    const cluster = process.env["MONGODB_CLUSTER"];
 
     if (!username || !password || !cluster) {
       throw new Error(
