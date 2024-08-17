@@ -3,9 +3,10 @@ import pluginJs from "@eslint/js";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 
-
+// TODO: eslint jest plugin
 export default [
   {
+    ignorePatterns: ['**/__tests__/**', '**/*.test.ts', '**/*.spec.ts'],
     files: ["**/*.{js,mjs,cjs,ts}"], // Target JS and TS files
     languageOptions: {
       globals: {
