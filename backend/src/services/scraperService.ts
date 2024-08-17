@@ -135,7 +135,7 @@ export class ScraperService {
     return contentLength ? parseInt(contentLength, 10) : null;
   }
 
-  private async scrapePage(url: string): Promise<ScrapedData> {
+  async scrapePage(url: string): Promise<ScrapedData> {
     if (!this.browser) {
       throw new Error("WebScraper not initialized");
     }
