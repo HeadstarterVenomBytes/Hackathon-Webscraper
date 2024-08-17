@@ -49,7 +49,7 @@ async function main() {
 
   if (urlsToScrape.length === 0) {
     console.error(
-      "No URLs provided. Please specify URLs in config.json or as command line arguments.",
+      "No URLs provided. Please specify URLs in config.json or as command line arguments."
     );
     process.exit(1);
   }
@@ -58,7 +58,7 @@ async function main() {
     MONGODB_USERNAME as string,
     MONGODB_PASSWORD as string,
     MONGODB_CLUSTER as string,
-    config.dbName,
+    config.dbName
   );
 
   const scraper = new WebScraper(database, urlsToScrape);
