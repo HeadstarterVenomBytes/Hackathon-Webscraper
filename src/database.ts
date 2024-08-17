@@ -9,7 +9,7 @@ export class Database {
     private username: string,
     private password: string,
     private cluster: string,
-    private dbName: string = "webscraper",
+    private dbName: string = "webscraper"
   ) {}
 
   private constructUri(): string {
@@ -37,5 +37,19 @@ export class Database {
       console.error("MongoDB connection error:", error);
       throw error;
     }
+  }
+
+  async close(): Promise<void> {
+    if (this.client) {
+      await this.client.close();
+      console.log("MongoDB connection closed");
+    }
+  }
+
+  async storeData(data: ScrapedData): Promise<void> {
+    if (!this.collection) {
+      throw new Error("Database not initialized");
+    }
+    await this.collection.insertOne(data);
   }
 }
