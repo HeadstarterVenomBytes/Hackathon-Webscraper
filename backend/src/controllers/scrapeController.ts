@@ -45,10 +45,12 @@ export const scrapeHandler = async (req: Request, res: Response) => {
       }
     }
 
-    res.status(200).json({ message: "Scraping completed.", results, errors });
+    return res
+      .status(200)
+      .json({ message: "Scraping completed.", results, errors });
   } catch (error) {
     console.error("An error in scrapeHandler:", error);
-    res
+    return res
       .status(500)
       .json({ error: "An error occurred during the scraping process." });
   } finally {
