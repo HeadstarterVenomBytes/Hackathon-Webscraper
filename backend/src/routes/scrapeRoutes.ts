@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { scrapeHandler } from "../controllers/scrapeController";
+import { createScrapeHandler } from "../controllers/scrapeController";
+import { DatabaseService } from "../services/databaseService";
 
-const router = Router();
+export function createScrapeRoutes(databaseService: DatabaseService): Router {
+  const router = Router();
 
-router.post("/", scrapeHandler);
+  // Pass the databaseService to the handler
+  router.post("/", createScrapeHandler(databaseService));
 
-export default router;
+  return router;
+}
