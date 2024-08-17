@@ -9,7 +9,10 @@ export default [
   {
     files: ["**/*.{js,mjs,cjs,ts}"], // Target JS and TS files
     languageOptions: {
-      globals: globals.node, // Enable Node.js globals
+      globals: {
+        ...globals.node, // Enable Node.js globals
+        ...globals.browser, // Enable browser-specific globals like 'document' and 'window'
+      },
       parser: tsParser, // Set TypeScript parser
       ecmaVersion: 2020, // Support ECMAScript 2020 features
       sourceType: "module", // Enable ES module support
