@@ -12,7 +12,7 @@ const ScraperForm: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post("/api/scrape", {
+      const response = await axios.post("https://localhost/api/scrape:3001", {
         urls: urls.split("\n").filter((url) => url.trim() !== ""),
         maxUrls,
       });
