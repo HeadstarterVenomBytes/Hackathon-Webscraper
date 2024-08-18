@@ -1,0 +1,46 @@
+name: Deploy backend to AWS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+
+env:
+  ELASTIC_BEANSTALK_NAME: web-scraper-express-backend
+  ELASTIC_BEANSTALK_ENV_NAME: Web-scraper-express-backend-env
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20"
+
+      - name: Change directory to backend
+        run: cd backend
+
+      - name: Install dependencies
+        run: |
+          cd packages/backend
+          npm ci
+          npm run build
+          zip -r deploy.zip .
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ env.ELASTIC_BEANSTALK_NAME }}
+          environment_name: ${{ env.ELASTIC_BEANSTALK_ENV_NAME }}
+          region: "us-east-1"
+          version_label: "v-${{ github.run_id }}"
+          deployment_package: "deploy.zip"
