@@ -13,16 +13,14 @@ export async function initializeApp(): Promise<Application> {
   // Middleware
   app.use(express.json());
 
-  // Enable CORS for all routes
-  app.use(cors());
-
-  // TODO: change to point to vercel link eventually
   // Or, for specific options:
-  // app.use(cors({
-  //   origin: 'http://example.com',
-  //   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  //   allowedHeaders: ['Content-Type', 'Authorization']
-  // }));
+  app.use(
+    cors({
+      origin: "https://hackathon-webscraper.vercel.app/",
+      methods: ["GET", "POST"],
+      optionsSuccessStatus: 200,
+    })
+  );
 
   // Initialize the database service and connect to the database
   const databaseService = new DatabaseService();
