@@ -31,7 +31,7 @@ export const createScrapeHandler = (databaseService: DatabaseService) => {
 
             // Add new internal links to the queue
             for (const link of data.links) {
-              if (!urlsToScrape.includes(link.href)) {
+              if (link.isInternal && !urlsToScrape.includes(link.href)) {
                 urlsToScrape.push(link.href);
               }
             }
