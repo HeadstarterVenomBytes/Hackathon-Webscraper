@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "backend/**"
+  pull_request:
+    branches:
+      - main
 
 env:
   ELASTIC_BEANSTALK_NAME: web-scraper-express-backend
@@ -27,8 +28,7 @@ jobs:
       - name: Change directory to backend
         run: cd backend
 
-
-       - name: Install dependencies
+      - name: Install dependencies
         working-directory: backend
         run: |
           npm ci
