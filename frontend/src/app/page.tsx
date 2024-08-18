@@ -1,11 +1,9 @@
-import React from "react";
-import { Container, Typography, CssBaseline } from "@mui/material";
+import { Container, Typography } from "@mui/material";
 import ScraperForm from "./components/ScraperForm";
 
-function App() {
+export default function Home() {
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
       <Typography component="h1" variant="h5">
         Web Scraper
       </Typography>
@@ -13,5 +11,3 @@ function App() {
     </Container>
   );
 }
-
-export default App;
