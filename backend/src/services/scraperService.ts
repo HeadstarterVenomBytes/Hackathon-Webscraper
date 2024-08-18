@@ -28,13 +28,13 @@ export class ScraperService {
       lastModified,
       contentLength,
     ] = await Promise.all([
-      this.extractTitle(page),
+      this.extractTitle(page).catch(() => ""),
       this.extractDescription(page),
       this.extractKeywords(page),
-      this.extractH1Headers(page),
-      this.extractParagraphs(page),
-      this.extractLinks(page, url),
-      this.extractImages(page),
+      this.extractH1Headers(page).catch(() => []),
+      this.extractParagraphs(page).catch(() => []),
+      this.extractLinks(page, url).catch(() => []),
+      this.extractImages(page).catch(() => []),
       this.getLastModified(response),
       this.getContentLength(response),
     ]);
@@ -56,68 +56,82 @@ export class ScraperService {
   }
 
   private async extractTitle(page: Page): Promise<string> {
-    return page.evaluate(() => document.title || "");
+    return page.$eval("title", (el) => el.textContent || "");
   }
 
   private async extractDescription(page: Page): Promise<string> {
-    return page.evaluate(() => {
-      const metaDescription = document.querySelector(
-        'meta[name="description"]'
-      );
-      return metaDescription
-        ? (metaDescription as HTMLMetaElement).content
-        : "";
-    });
+    return page
+      .$eval(
+        'meta[name="description"]',
+        (el: HTMLMetaElement) => el.content || ""
+      )
+      .catch(() => "");
   }
 
   private async extractKeywords(page: Page): Promise<string[]> {
-    return page.evaluate(() => {
-      const metaKeywords = document.querySelector('meta[name="keywords"]');
-      return metaKeywords
-        ? (metaKeywords as HTMLMetaElement).content
-            .split(",")
-            .map((keyword) => keyword.trim())
-        : [];
-    });
+    return page
+      .$eval('meta[name="keywords"]', (el: HTMLMetaElement) =>
+        el.content.split(",").map((keyword) => keyword.trim())
+      )
+      .catch(() => []);
   }
 
   private async extractH1Headers(page: Page): Promise<string[]> {
-    return page.evaluate(() => {
-      const h1Elements = document.querySelectorAll("h1");
-      return Array.from(h1Elements).map((el) => el.textContent?.trim() || "");
-    });
+    return page.$$eval("h1", (elements) =>
+      elements.map((el) => el.textContent?.trim() || "")
+    );
   }
 
   private async extractParagraphs(page: Page): Promise<string[]> {
-    return page.evaluate(() => {
-      const paragraphs = document.querySelectorAll("p");
-      return Array.from(paragraphs)
-        .map((p) => p.textContent?.trim() || "")
-        .filter((text) => text.length > 0);
-    });
+    return page.$$eval("p", (elements) =>
+      elements
+        .map((el) => el.textContent?.trim() || "")
+        .filter((text) => text.length > 0)
+    );
   }
 
   private async extractLinks(page: Page, baseUrl: string): Promise<LinkData[]> {
-    return page.evaluate((baseUrl) => {
-      const links = document.querySelectorAll("a");
-      return Array.from(links).map((link) => ({
-        href: link.href,
-        text: link.textContent?.trim() || "",
-        isInternal: link.href.startsWith(baseUrl),
-      }));
-    }, baseUrl);
+    return page.$$eval(
+      "a",
+      (elements, baseUrl) => {
+        const baseHostname = new URL(baseUrl).hostname;
+        const baseDomain = baseHostname.split(".").slice(-2).join("."); // Get base domain without subdomain
+
+        return elements.map((link) => {
+          let linkUrl;
+          try {
+            linkUrl = new URL(link.href);
+          } catch {
+            // If href is invalid, consider it internal
+            return {
+              href: link.href,
+              text: link.textContent?.trim() || "",
+              isInternal: true,
+            };
+          }
+
+          const linkDomain = linkUrl.hostname.split(".").slice(-2).join(".");
+
+          return {
+            href: link.href,
+            text: link.textContent?.trim() || "",
+            isInternal: linkDomain === baseDomain, // Compare base domains
+          };
+        });
+      },
+      baseUrl
+    );
   }
 
   private async extractImages(page: Page): Promise<ImageData[]> {
-    return page.evaluate(() => {
-      const images = document.querySelectorAll("img");
-      return Array.from(images).map((img) => ({
+    return page.$$eval("img", (elements) =>
+      elements.map((img) => ({
         src: img.src,
         alt: img.alt,
         width: img.width || null,
         height: img.height || null,
-      }));
-    });
+      }))
+    );
   }
 
   private async getLastModified(
@@ -146,7 +160,24 @@ export class ScraperService {
       page = await this.browser.newPage();
       page.setDefaultNavigationTimeout(30000);
 
-      const response = await page.goto(url, { waitUntil: "networkidle0" });
+      await page.setUserAgent(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+      );
+
+      // Disable caching
+      await page.setCacheEnabled(false);
+
+      // Set headers to avoid 304
+      await page.setExtraHTTPHeaders({
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      });
+
+      const response = await page.goto(url, {
+        waitUntil: "networkidle0",
+        // Force reload
+        referer: "",
+      });
 
       if (!response) {
         throw new Error("No response received from the page");
