@@ -1,0 +1,13 @@
+{
+  "name": "olostep-scraper-app",
+  "version": "1.0.0",
+  "scripts": {
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && npm start",
+    "prestart": "npm run start:backend",
+    "start": "npm run prestart && npm run start:frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

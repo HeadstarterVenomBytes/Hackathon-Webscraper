@@ -1,16 +1,30 @@
 import express, { Application } from "express";
 import dotenv from "dotenv";
-import scrapeRoutes from "./routes/scrapeRoutes";
+import { DatabaseService } from "./services/databaseService";
+import { createScrapeRoutes } from "./routes/scrapeRoutes";
 
-// Load environment variables
-dotenv.config();
+export async function initializeApp(): Promise<Application> {
+  // Load environment variables
+  dotenv.config();
 
-const app: Application = express();
+  const app: Application = express();
 
-// Middleware
-app.use(express.json());
+  // Middleware
+  app.use(express.json());
 
-// Routes
-app.use("/api/scrape", scrapeRoutes);
+  // Initialize the database service and connect to the database
+  const databaseService = new DatabaseService();
+  await databaseService.connect();
 
-export default app;
+  // Routes
+  app.use("/api/scrape", createScrapeRoutes(databaseService));
+
+  // Handle graceful shutdown
+  process.on("SIGINT", async () => {
+    console.log("Gracefully shutting down...");
+    await databaseService.close();
+    process.exit(0);
+  });
+
+  return app;
+}
