@@ -27,9 +27,10 @@ jobs:
       - name: Change directory to backend
         run: cd backend
 
-      - name: Install dependencies
+
+       - name: Install dependencies
+        working-directory: backend
         run: |
-          cd backend
           npm ci
           npm run build
           zip -r deploy.zip .
