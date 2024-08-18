@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "backend/**"
   pull_request:
     branches:
       - main
+    paths:
+      - "backend/**"
 
 env:
   ELASTIC_BEANSTALK_NAME: web-scraper-express-backend
