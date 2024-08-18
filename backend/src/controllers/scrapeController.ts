@@ -14,27 +14,16 @@ export const createScrapeHandler = (databaseService: DatabaseService) => {
     }
 
     const scrapeService = new ScraperService();
-    const scrapedUrls = new Set<string>();
 
     try {
       await scrapeService.init();
+
       const results: ScrapedData[] = [];
       const errors: { url: string; error: string }[] = [];
-      const urlQueue = new Set(urlsToScrape);
 
       while (urlsToScrape.length > 0 && results.length < maxUrls) {
-        const url = urlQueue.values().next().value;
-
-        if (!url || typeof url !== "string" || !url.trim()) {
-          // Skip invalid URL
-          console.error(`Skipping invalid URL: ${url}`);
-          urlQueue.delete(url as string); // Remove invalid URL from queue
-          continue;
-        }
-
-        urlQueue.delete(url);
-
-        if (!scrapedUrls.has(url)) {
+        const url = urlsToScrape.shift(); // Get the next URL to scrape
+        if (url) {
           try {
             const data = await scrapeService.scrapePage(url);
             results.push(data); // TODO: batch write?
@@ -42,11 +31,7 @@ export const createScrapeHandler = (databaseService: DatabaseService) => {
 
             // Add new internal links to the queue
             for (const link of data.links) {
-              if (
-                link.isInternal &&
-                !urlQueue.has(link.href) &&
-                !scrapedUrls.has(link.href)
-              ) {
+              if (!urlsToScrape.includes(link.href)) {
                 urlsToScrape.push(link.href);
               }
             }
